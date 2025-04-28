@@ -242,7 +242,7 @@ namespace WinFormApp_pxToRGB
             else { e.Cancel = true; }
         }
 
-        protected override void WndProc(ref Message m)  //2022-11-17
+        protected override void WndProc(ref Message m) 
         {
             const int WM_DEVICECHANGE = 0x219;
             const int DBT_DEVICEARRIVAL = 0x8000;
@@ -252,7 +252,6 @@ namespace WinFormApp_pxToRGB
             const int SC_CLOSE = 0xF060;
             const int SC_CLICK = 0xF093;
             const int SC_DOUBLE_CLICK = 0xF063;
-            const int iCurr80mA = 146;
 
             object ojb = new object();
             try   //2023-09-25
