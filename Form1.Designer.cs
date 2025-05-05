@@ -118,12 +118,12 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label13.Location = new System.Drawing.Point(542, 46);
+            this.label13.Location = new System.Drawing.Point(522, 46);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(50, 19);
+            this.label13.Size = new System.Drawing.Size(73, 19);
             this.label13.TabIndex = 97;
-            this.label13.Text = "MAC :";
+            this.label13.Text = "PC MAC :";
             // 
             // menuStrip1
             // 
@@ -135,7 +135,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(800, 30);
+            this.menuStrip1.Size = new System.Drawing.Size(800, 27);
             this.menuStrip1.TabIndex = 98;
             this.menuStrip1.Text = "menuStrip1";
             // 

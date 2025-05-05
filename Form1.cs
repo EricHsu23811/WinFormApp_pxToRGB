@@ -49,7 +49,7 @@ namespace WinFormApp_pxToRGB
         static string fileName = Assembly.GetExecutingAssembly().GetName().Name;
         //獲取執行檔版本
         string fileVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        string buildDateTime = System.IO.File.GetCreationTime(Assembly.GetExecutingAssembly().Location).ToString("yyyy-MM-dd HH:mm:ss");
+        string buildDateTime = System.IO.File.GetCreationTime(Assembly.GetExecutingAssembly().Location).ToString("yyyy-MM-dd HH:mm");    //ToString("yyyy-MM-dd HH:mm:ss")
 
         string strFilePath = "";    //userAppFolder + "\\" + "H4_IQC_LBS_BURN.csv";
         static string strDailyLogDate = DateTime.Now.ToString("yyyy-MM-dd");
