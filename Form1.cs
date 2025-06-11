@@ -152,7 +152,7 @@ namespace WinFormApp_pxToRGB
             // 設定輸入和輸出檔案路徑
             string inputImagePath = txtFilePath.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
             string outputImagePath = userAppFolder + "\\output.png";    //"output.png"; // 替換為你的輸出圖片路徑
-            utilCheckUserFile();
+            utilCheckUserFile(); Boolean bRGBmix = false; //非純RGB是否要混色
 
             try
             {
@@ -182,21 +182,21 @@ namespace WinFormApp_pxToRGB
                             {
                                 case 0: //b
                                     // 建立新的顏色
-                                    if (b > Cut && (r != 0 || g != 0))
+                                    if (bRGBmix && b > Cut && (r != 0 || g != 0))
                                     { newColor = Color.FromArgb(r, g, b); }
                                     else
                                     { newColor = Color.FromArgb(0, 0, b); }
                                     break;
                                 case 1: //g
                                     // 建立新的顏色
-                                    if (g > Cut && (r != 0 || b != 0))
+                                    if (bRGBmix && g > Cut && (r != 0 || b != 0))
                                     { newColor = Color.FromArgb(r, g, b); }
                                     else
                                     { newColor = Color.FromArgb(0, g, 0); }
                                     break;
                                 case 2: //r
                                     // 建立新的顏色
-                                    if (r > Cut && (g != 0 || b != 0))
+                                    if (bRGBmix && r > Cut && (g != 0 || b != 0))
                                     { newColor = Color.FromArgb(r, g, b); }
                                     else
                                     { newColor = Color.FromArgb(r, 0, 0); }
@@ -230,7 +230,7 @@ namespace WinFormApp_pxToRGB
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Environment.Exit(Environment.ExitCode);
+            //Environment.Exit(Environment.ExitCode);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
