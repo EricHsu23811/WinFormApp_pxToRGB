@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*****************************************************************************
+ **
+ **  (c) All Rights Reserved.
+ **  
+ **
+ **
+ ** 打開輸出圖檔所在資料夾:2025-06-18
+******************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -220,6 +229,8 @@ namespace WinFormApp_pxToRGB
 
                 Console.WriteLine("圖片處理完成，已儲存至 " + outputImagePath);
                 toolStripStatusLabel1.Text = "圖片處理完成，已儲存至 " + outputImagePath;
+                //Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Process.Start("explorer.exe", userAppFolder); //打開輸出圖檔所在資料夾:2025-06-18
             }
             catch (Exception ex)
             {
