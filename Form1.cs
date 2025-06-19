@@ -5,6 +5,7 @@
  **
  **
  ** 打開輸出圖檔所在資料夾:2025-06-18
+ ** MacAdress格式更新，2025-06-19
 ******************************************************************************/
 
 using System;
@@ -112,6 +113,7 @@ namespace WinFormApp_pxToRGB
                     break;
                 }
             }
+            macAddresses = AddSpaceEveryNChar(macAddresses, 2); //2025-06-19
             return macAddresses;
         }
         private void utilCheckUserFile()
@@ -314,6 +316,15 @@ namespace WinFormApp_pxToRGB
                 MessageBox.Show(ex.Message, "WndProc");
             }
             base.WndProc(ref m);
+        }
+        static string AddSpaceEveryNChar(string str, int split)   //2023-08-11
+        {
+            for (int a = 2; a <= str.Length - 1; a = a + split + 1)
+            {
+                str = str.Insert(a, "-");
+            }
+            Console.WriteLine(str);
+            return str;
         }
     }
 }
