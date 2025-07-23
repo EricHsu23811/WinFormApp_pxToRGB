@@ -6,6 +6,7 @@
  **
  ** 打開輸出圖檔所在資料夾:2025-06-18
  ** MacAdress格式更新，2025-06-19
+ ** btnPxsToHex_Click，2025-07-23
 ******************************************************************************/
 
 using System;
@@ -325,6 +326,70 @@ namespace WinFormApp_pxToRGB
             }
             Console.WriteLine(str);
             return str;
+        }
+
+        private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22
+        {
+            // 設定輸入和輸出檔案路徑
+            string inputImagePath = txtFilePath.Text;   // 替換為輸入圖片路徑
+            string outputTextPath = userAppFolder + "\\PxsToHex.text";    //"輸出路徑檔案
+            utilCheckUserFile();
+            //2025-07-23
+            Boolean bRGBseparate = false; //非純RGB是否要混色
+            File.Delete(outputTextPath); //刪除舊檔案  
+            richTextBox1.Text = ""; //清空richTextBox1
+
+            try
+            {
+                // 讀取圖片
+                Bitmap inputImage = new Bitmap(inputImagePath);
+
+                // 遍歷每個像素
+                for (int y = 0; y < inputImage.Height; y++)
+                {
+                    for (int x = 0; x < inputImage.Width; x++)
+                    {
+                        // 獲取像素的 RGB 值
+                        Color pixelColor = inputImage.GetPixel(x, y);
+                        byte r = pixelColor.R;
+                        byte g = pixelColor.G;
+                        byte b = pixelColor.B;
+                        Color newColor = Color.FromArgb(0, 0, 0);   //default
+                        byte Cut = 8;  //no show out if under the value
+                        if (bRGBseparate)   //2025-07-23
+                        {
+                            if (x % 3 == 1 && r > Cut)
+                            { richTextBox1.AppendText("0xFF,"); }
+                            else { richTextBox1.AppendText("0x00,"); ; }
+                        }
+                        else
+                        {
+                            if (r > Cut || g > Cut || b > Cut)
+                            { richTextBox1.AppendText("0xFF,"); }
+                            else { richTextBox1.AppendText("0x00,"); ; }
+                        }                        
+                    }
+                    richTextBox1.AppendText("\r");
+                }                  
+                File.AppendAllText(outputTextPath, richTextBox1.Text);
+
+                // 釋放資源
+                inputImage.Dispose();
+
+                Console.WriteLine("圖片處理完成，已儲存至 " + outputTextPath);
+                toolStripStatusLabel1.Text = "圖片處理完成，已儲存至 " + outputTextPath;
+                //Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Process.Start("explorer.exe", userAppFolder); //打開輸出圖檔所在資料夾:2025-06-18
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("發生錯誤: " + ex.Message);
+                toolStripStatusLabel1.Text = "發生錯誤: " + ex.Message;
+            }
+            finally
+            {
+                toolStripStatusLabel1.Text = "PxsToHex Done.";
+            }
         }
     }
 }
