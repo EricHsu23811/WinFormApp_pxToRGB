@@ -46,6 +46,7 @@
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.btnPxsToHex = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btn1from9 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -149,7 +150,7 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(47, 26);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(47, 23);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
@@ -163,7 +164,7 @@
             // 
             this.settingToolStripMenuItem.Enabled = false;
             this.settingToolStripMenuItem.Name = "settingToolStripMenuItem";
-            this.settingToolStripMenuItem.Size = new System.Drawing.Size(73, 26);
+            this.settingToolStripMenuItem.Size = new System.Drawing.Size(73, 23);
             this.settingToolStripMenuItem.Text = "Setting";
             // 
             // helpToolStripMenuItem
@@ -171,7 +172,7 @@
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 26);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 23);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem
@@ -195,15 +196,26 @@
             // 
             this.richTextBox1.Location = new System.Drawing.Point(15, 165);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(622, 135);
+            this.richTextBox1.Size = new System.Drawing.Size(629, 135);
             this.richTextBox1.TabIndex = 100;
             this.richTextBox1.Text = "";
+            // 
+            // btn1from9
+            // 
+            this.btn1from9.Location = new System.Drawing.Point(650, 211);
+            this.btn1from9.Name = "btn1from9";
+            this.btn1from9.Size = new System.Drawing.Size(138, 40);
+            this.btn1from9.TabIndex = 101;
+            this.btn1from9.Text = "pick 1px from 9pxs";
+            this.btn1from9.UseVisualStyleBackColor = true;
+            this.btn1from9.Click += new System.EventHandler(this.btn1from9_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 368);
+            this.Controls.Add(this.btn1from9);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.btnPxsToHex);
             this.Controls.Add(this.menuStrip1);
@@ -247,6 +259,7 @@
         private System.IO.Ports.SerialPort serialPort1;
         private System.Windows.Forms.Button btnPxsToHex;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button btn1from9;
     }
 }
 
