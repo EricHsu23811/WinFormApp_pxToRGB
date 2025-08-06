@@ -7,8 +7,9 @@
  ** 打開輸出圖檔所在資料夾:2025-06-18
  ** MacAdress格式更新，2025-06-19
  ** btnPxsToHex_Click，2025-07-23
- ** btn1from9_Click，2025-07-30
- **
+ ** btn1from9_Click，3x3 pxs select 1 px at center，2025-07-30
+ ** btn1from9_Click add 3x3 or 9x1 selection，2025-07-31
+ ** btnPicToDec_Click，將圖檔轉為RGB565分兩個Byte傳輸，共72*176*2=25344 bytes，2025-08-05
  ** 
 ******************************************************************************/
 
@@ -73,12 +74,22 @@ namespace WinFormApp_pxToRGB
         string strFileDailyPath = "";   //userAppFolder + "\\" + strLogNameDaily;    //@"\Burn1to10.csv";
         string strSwVer = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.ToString();
 
+        public enum ColorIdx //2025-08-05
+        {
+            Red = 1,
+            Green = 2,
+            Blue = 3
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            txtFilePath.ReadOnly = true;
-            txtFilePath.BackColor = SystemColors.Info;
+            FilePath1.ReadOnly = true;
+            FilePath1.BackColor = SystemColors.Info;
             toolStripStatusLabel1.Text = "Select a image file to convert.";
             btnToBGR.Enabled = false; btnPxsToHex.Enabled = false; //2025-07-22
+            btn1from9.Enabled = false; //2025-07-30
+            btnDecToHex.Enabled = false;    //2025-08-04
+            btnPicToDec.Enabled = false; //2025-08-05
 
             txtMac.Text = GetMacAddress().ToString();
             lblSWver.Text = /*"SW : " +*/ fileName + " - ver: " + strSwVer + " ; 程式碼日期 : " + buildDateTime;
@@ -238,11 +249,11 @@ namespace WinFormApp_pxToRGB
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
                 string file = openDialog.FileName;
-                txtFilePath.Text = file;
-                toolStripStatusLabel1.Text = "InputFile= " + txtFilePath.Text;
+                FilePath1.Text = file;
+                toolStripStatusLabel1.Text = "InputFile= " + FilePath1.Text;
             }
-            if (txtFilePath.Text != "") { btnToBGR.Enabled = true; btnPxsToHex.Enabled = true; }
-            else { btnToBGR.Enabled = false; btnPxsToHex.Enabled = false; }
+            if (FilePath1.Text != "") { btnToBGR.Enabled = true; btnPxsToHex.Enabled = true; btn1from9.Enabled = true; btnPicToDec.Enabled = true; }  //2025-08-06
+            else { btnToBGR.Enabled = false; btnPxsToHex.Enabled = false; btn1from9.Enabled = false; btnPicToDec.Enabled = false; }
 
             toolStripStatusLabel1.Text = "按下 ToBGRimage 或者 To_Hex 按鈕以產出結果";
         }
@@ -250,7 +261,7 @@ namespace WinFormApp_pxToRGB
         private void btnToBGR_Click(object sender, EventArgs e)
         {
             // 設定輸入和輸出檔案路徑
-            string inputImagePath = txtFilePath.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
+            string inputImagePath = FilePath1.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
             string outputImagePath = userAppFolder + "\\pxToRGB.png";    //"output.png"; // 替換為你的輸出圖片路徑
             utilCheckUserFile(); Boolean bRGBmix = false; //非純RGB是否要混色
 
@@ -334,13 +345,15 @@ namespace WinFormApp_pxToRGB
         private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22
         {
             // 設定輸入和輸出檔案路徑
-            string inputImagePath = txtFilePath.Text;   // 替換為輸入圖片路徑
+            string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
             string outputTextPath = userAppFolder + "\\PxsToHex.text";    //"輸出路徑檔案
             utilCheckUserFile();
             //2025-07-23
-            Boolean bRGBseparate = false; //非純RGB是否要混色
+            Boolean bRGBseparate = true; //RGB是否要分色
             File.Delete(outputTextPath); //刪除舊檔案  
             richTextBox1.Text = ""; //清空richTextBox1
+            Boolean bPxsToDec = true; //是否要轉成十進位數字，預設為false
+            int iWidthDiv = 1; //取RGB單一px時，原圖width每iWidthDiv個px取中間1px出來
 
             try
             {
@@ -350,7 +363,7 @@ namespace WinFormApp_pxToRGB
                 // 遍歷每個像素
                 for (int y = 0; y < inputImage.Height; y++)
                 {
-                    for (int x = 0; x < inputImage.Width; x++)
+                    for (int x = 0; x < inputImage.Width/ iWidthDiv; x++)   //2025-08-05
                     {
                         // 獲取像素的 RGB 值
                         Color pixelColor = inputImage.GetPixel(x, y);
@@ -359,18 +372,37 @@ namespace WinFormApp_pxToRGB
                         byte b = pixelColor.B;
                         Color newColor = Color.FromArgb(0, 0, 0);   //default
                         byte Cut = 8;  //no show out if under the value
-                        if (bRGBseparate)   //2025-07-23
+
+                        if (bPxsToDec)  //2025-08-05
                         {
-                            if (x % 3 == 1 && r > Cut)
-                            { richTextBox1.AppendText("0xFF,"); }
-                            else { richTextBox1.AppendText("0x00,"); ; }
+                            if (bRGBseparate)
+                            {
+                                if (x % 3 == 1 && r > Cut)
+                                { richTextBox1.AppendText("255,"); }
+                                else { richTextBox1.AppendText("0,"); ; }
+                            }
+                            else
+                            {
+                                if (r > Cut || g > Cut || b > Cut)
+                                { richTextBox1.AppendText("255,"); }
+                                else { richTextBox1.AppendText("0,"); ; }
+                            }
                         }
                         else
                         {
-                            if (r > Cut || g > Cut || b > Cut)
-                            { richTextBox1.AppendText("0xFF,"); }
-                            else { richTextBox1.AppendText("0x00,"); ; }
-                        }                        
+                            if (bRGBseparate)   //2025-07-23
+                            {
+                                if (x % 3 == 1 && r > Cut)
+                                { richTextBox1.AppendText("0xFF,"); }
+                                else { richTextBox1.AppendText("0x00,"); ; }
+                            }
+                            else
+                            {
+                                if (r > Cut || g > Cut || b > Cut)
+                                { richTextBox1.AppendText("0xFF,"); }
+                                else { richTextBox1.AppendText("0x00,"); ; }
+                            }
+                        }                                              
                     }
                     richTextBox1.AppendText("\r");
                 }                  
@@ -398,14 +430,21 @@ namespace WinFormApp_pxToRGB
         private void btn1from9_Click(object sender, EventArgs e)    //2025-07-30
         {
             // 設定輸入和輸出檔案路徑
-            string inputImagePath = txtFilePath.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
+            string inputImagePath = FilePath1.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
             string outputImagePath = userAppFolder + "\\1pxFrom9.png";    //"output.png"; // 替換為你的輸出圖片路徑
             utilCheckUserFile(); Boolean bRGBmix = false; //非純RGB是否要混色
             int iWidthDiv = 3; //原圖width每iWidthDiv個px取中間1px出來
             int iHeightDiv = 3; //原圖Height每iHeightDiv個px取中間1px出來
+            Boolean bSelect1from3x3 = false; //選擇是否1px從3x3 px中取出來
 
             try
             {
+                if (!bSelect1from3x3)   //2025-07-31
+                {
+                    iWidthDiv = 9; //原圖width每iWidthDiv個px取中間1px出來
+                    iHeightDiv = 1; //原圖Height每iHeightDiv個px取中間1px出來
+                }
+
                 // 讀取圖片
                 Bitmap inputImage = new Bitmap(inputImagePath);
                 // 建立輸出圖片:原圖每3px取中間1px出來
@@ -457,5 +496,136 @@ namespace WinFormApp_pxToRGB
                 toolStripStatusLabel1.Text = "btn1from9_Click" + "發生錯誤: " + ex.Message;
             }
         }
+
+        private void btn25344_Click(object sender, EventArgs e) //2025-08-04
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Title = "Select A File";
+            openDialog.Filter = "Text Files (*.txt;*.c;*.h;*.html)|*.txt;*.c;*.h;*.html" + "|" + "All Files (*.*)|*.*";
+            if (openDialog.ShowDialog() == DialogResult.OK)
+            {
+                string file = openDialog.FileName;
+                FilePath2.Text = file;
+                toolStripStatusLabel1.Text = "InputFile= " + FilePath2.Text;
+            }
+            if (FilePath2.Text != "") { btnDecToHex.Enabled = true; }
+            else { btnDecToHex.Enabled = false; }
+
+            toolStripStatusLabel1.Text = "按下 ToBGRimage 或者 To_Hex 按鈕以產出結果";
+        }
+
+        private void btnDecToHex_Click(object sender, EventArgs e) //2025-08-04：Decimal 轉 Hex，功能先不需要，暫時保留，後續應可加上其他功能
+        {
+            // 設定輸入和輸出檔案路徑
+            string inputTextPath = FilePath2.Text;   // 替換為輸入圖片路徑
+            string outputTextPath = userAppFolder + "\\DecToHex.text";    //"輸出路徑檔案
+            utilCheckUserFile();
+
+            File.Delete(outputTextPath); //刪除舊檔案  
+            richTextBox1.Text = ""; //清空richTextBox1
+
+            try
+            {
+                // 讀取檔案
+                string[] lines = File.ReadAllLines(inputTextPath);
+
+                Console.WriteLine("圖片處理完成，已儲存至 " + outputTextPath);
+                toolStripStatusLabel1.Text = "圖片處理完成，已儲存至 " + outputTextPath;
+                //Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Process.Start("explorer.exe", userAppFolder); //打開輸出圖檔所在資料夾
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("btnDecToHex_Click" + "發生錯誤: " + ex.Message);
+                toolStripStatusLabel1.Text = "btnDecToHex_Click" + "發生錯誤: " + ex.Message;
+            }
+            finally
+            {
+                toolStripStatusLabel1.Text = "DecToHex Done.";
+            }
+        }
+
+        private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05：72x176 pxs圖片轉RGB565分兩個Byte傳輸
+        {
+            // 設定輸入和輸出檔案路徑
+            string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
+            string outputTextPath = userAppFolder + "\\PxsToDec.text";    //"輸出路徑檔案
+            utilCheckUserFile();
+
+            File.Delete(outputTextPath); //刪除舊檔案  
+            richTextBox1.Text = ""; //清空richTextBox1
+
+            try
+            {
+                // 讀取圖片
+                Bitmap inputImage = new Bitmap(inputImagePath);
+
+                // 遍歷每個像素
+                for (int y = 0; y < inputImage.Height; y++)
+                {
+                    for (int x = 0; x < inputImage.Width; x++)  
+                    {
+                        // 獲取像素的 RGB 值
+                        Color pixelColor = inputImage.GetPixel(x, y);
+                        byte r = pixelColor.R;
+                        byte g = pixelColor.G;
+                        byte b = pixelColor.B;
+                        byte Cut = 8;  //no show out if under the value
+                        int RGB565data1 = 0; //高位Byte
+                        int RGB565data2 = 0; //低位Byte
+
+                        //if (r > Cut || g > Cut || b > Cut) //將RGB值轉為最大值255
+                        //{ r = 255; g = 255; b = 255; }
+
+                        ushort rgb565Color = ConvertToRGB565(r, g, b);
+                        Console.WriteLine($"RGB565 Color: {rgb565Color}");
+                        //richTextBox1.AppendText(rgb565Color + ",");
+                        RGB565data1 = (rgb565Color >> 8) & 0xFF; //高位Byte
+                        richTextBox1.AppendText(RGB565data1 + ",");
+                        RGB565data2 = rgb565Color & 0xFF; //低位Byte
+                        richTextBox1.AppendText(RGB565data2 + ",");
+                    }
+                    //richTextBox1.AppendText("\r");
+                }
+                File.AppendAllText(outputTextPath, richTextBox1.Text);
+
+                // 釋放資源
+                inputImage.Dispose();
+
+                Console.WriteLine("圖片處理完成，已儲存至 " + outputTextPath);
+                toolStripStatusLabel1.Text = "圖片處理完成，已儲存至 " + outputTextPath;
+                //Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Process.Start("explorer.exe", userAppFolder);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("btnPicToDec_Click" + "發生錯誤: " + ex.Message);
+                toolStripStatusLabel1.Text = "btnPicToDec_Click" + "發生錯誤: " + ex.Message;
+            }
+            finally
+            {
+                toolStripStatusLabel1.Text = "btnPicToDec_Click Done.";
+            }
+        }
+        public static int Clamp(int value, int min, int max)    //2025-08-05：Math未包含Clamp的定義，因此自行定義
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
+        public ushort ConvertToRGB565(int r, int g, int b)
+        {
+            // 确保 RGB 值在 0 到 255 之间
+            r = /*Math.*/Clamp(r, 0, 255);
+            g = /*Math.*/Clamp(g, 0, 255);
+            b = /*Math.*/Clamp(b, 0, 255);
+
+            // 转换到 RGB565
+            ushort rgb565 = (ushort)((r >> 3) << 11 | (g >> 2) << 5 | (b >> 3));
+
+            return rgb565;
+        }
+
     }
 }

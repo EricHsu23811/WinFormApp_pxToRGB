@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.btnImgSelect = new System.Windows.Forms.Button();
-            this.txtFilePath = new System.Windows.Forms.TextBox();
+            this.FilePath1 = new System.Windows.Forms.TextBox();
             this.btnToBGR = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -47,13 +47,17 @@
             this.btnPxsToHex = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.btn1from9 = new System.Windows.Forms.Button();
+            this.FilePath2 = new System.Windows.Forms.TextBox();
+            this.btnSelectText = new System.Windows.Forms.Button();
+            this.btnDecToHex = new System.Windows.Forms.Button();
+            this.btnPicToDec = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnImgSelect
             // 
-            this.btnImgSelect.Location = new System.Drawing.Point(12, 44);
+            this.btnImgSelect.Location = new System.Drawing.Point(15, 60);
             this.btnImgSelect.Name = "btnImgSelect";
             this.btnImgSelect.Size = new System.Drawing.Size(138, 40);
             this.btnImgSelect.TabIndex = 0;
@@ -61,18 +65,18 @@
             this.btnImgSelect.UseVisualStyleBackColor = true;
             this.btnImgSelect.Click += new System.EventHandler(this.btnImgSelect_Click);
             // 
-            // txtFilePath
+            // FilePath1
             // 
-            this.txtFilePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtFilePath.Location = new System.Drawing.Point(12, 89);
-            this.txtFilePath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.txtFilePath.Name = "txtFilePath";
-            this.txtFilePath.Size = new System.Drawing.Size(776, 25);
-            this.txtFilePath.TabIndex = 7;
+            this.FilePath1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.FilePath1.Location = new System.Drawing.Point(159, 71);
+            this.FilePath1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.FilePath1.Name = "FilePath1";
+            this.FilePath1.Size = new System.Drawing.Size(485, 25);
+            this.FilePath1.TabIndex = 7;
             // 
             // btnToBGR
             // 
-            this.btnToBGR.Location = new System.Drawing.Point(650, 119);
+            this.btnToBGR.Location = new System.Drawing.Point(650, 60);
             this.btnToBGR.Name = "btnToBGR";
             this.btnToBGR.Size = new System.Drawing.Size(138, 40);
             this.btnToBGR.TabIndex = 8;
@@ -113,7 +117,7 @@
             this.txtMac.Enabled = false;
             this.txtMac.Font = new System.Drawing.Font("新細明體", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtMac.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.txtMac.Location = new System.Drawing.Point(600, 44);
+            this.txtMac.Location = new System.Drawing.Point(599, 37);
             this.txtMac.Margin = new System.Windows.Forms.Padding(4);
             this.txtMac.Name = "txtMac";
             this.txtMac.Size = new System.Drawing.Size(188, 21);
@@ -124,7 +128,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label13.Location = new System.Drawing.Point(522, 46);
+            this.label13.Location = new System.Drawing.Point(522, 39);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(73, 19);
@@ -184,25 +188,25 @@
             // 
             // btnPxsToHex
             // 
-            this.btnPxsToHex.Location = new System.Drawing.Point(650, 165);
+            this.btnPxsToHex.Location = new System.Drawing.Point(649, 106);
             this.btnPxsToHex.Name = "btnPxsToHex";
             this.btnPxsToHex.Size = new System.Drawing.Size(138, 40);
             this.btnPxsToHex.TabIndex = 99;
-            this.btnPxsToHex.Text = "216x176_to_HEX";
+            this.btnPxsToHex.Text = "Img_to_HEX/Dec";
             this.btnPxsToHex.UseVisualStyleBackColor = true;
             this.btnPxsToHex.Click += new System.EventHandler(this.btnPxsToHex_Click);
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(15, 165);
+            this.richTextBox1.Location = new System.Drawing.Point(15, 106);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(629, 135);
+            this.richTextBox1.Size = new System.Drawing.Size(629, 132);
             this.richTextBox1.TabIndex = 100;
             this.richTextBox1.Text = "";
             // 
             // btn1from9
             // 
-            this.btn1from9.Location = new System.Drawing.Point(650, 211);
+            this.btn1from9.Location = new System.Drawing.Point(650, 198);
             this.btn1from9.Name = "btn1from9";
             this.btn1from9.Size = new System.Drawing.Size(138, 40);
             this.btn1from9.TabIndex = 101;
@@ -210,11 +214,54 @@
             this.btn1from9.UseVisualStyleBackColor = true;
             this.btn1from9.Click += new System.EventHandler(this.btn1from9_Click);
             // 
+            // FilePath2
+            // 
+            this.FilePath2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.FilePath2.Location = new System.Drawing.Point(159, 279);
+            this.FilePath2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.FilePath2.Name = "FilePath2";
+            this.FilePath2.Size = new System.Drawing.Size(485, 25);
+            this.FilePath2.TabIndex = 103;
+            // 
+            // btnSelectText
+            // 
+            this.btnSelectText.Location = new System.Drawing.Point(15, 268);
+            this.btnSelectText.Name = "btnSelectText";
+            this.btnSelectText.Size = new System.Drawing.Size(138, 40);
+            this.btnSelectText.TabIndex = 102;
+            this.btnSelectText.Text = "SelectText";
+            this.btnSelectText.UseVisualStyleBackColor = true;
+            this.btnSelectText.Click += new System.EventHandler(this.btn25344_Click);
+            // 
+            // btnDecToHex
+            // 
+            this.btnDecToHex.Location = new System.Drawing.Point(649, 268);
+            this.btnDecToHex.Name = "btnDecToHex";
+            this.btnDecToHex.Size = new System.Drawing.Size(138, 40);
+            this.btnDecToHex.TabIndex = 104;
+            this.btnDecToHex.Text = "DecToHex(NoUse)";
+            this.btnDecToHex.UseVisualStyleBackColor = true;
+            this.btnDecToHex.Click += new System.EventHandler(this.btnDecToHex_Click);
+            // 
+            // btnPicToDec
+            // 
+            this.btnPicToDec.Location = new System.Drawing.Point(649, 152);
+            this.btnPicToDec.Name = "btnPicToDec";
+            this.btnPicToDec.Size = new System.Drawing.Size(138, 40);
+            this.btnPicToDec.TabIndex = 105;
+            this.btnPicToDec.Text = "ImgToDec[25344]";
+            this.btnPicToDec.UseVisualStyleBackColor = true;
+            this.btnPicToDec.Click += new System.EventHandler(this.btnPicToDec_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 368);
+            this.Controls.Add(this.btnPicToDec);
+            this.Controls.Add(this.btnDecToHex);
+            this.Controls.Add(this.FilePath2);
+            this.Controls.Add(this.btnSelectText);
             this.Controls.Add(this.btn1from9);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.btnPxsToHex);
@@ -224,7 +271,7 @@
             this.Controls.Add(this.lblSWver);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnToBGR);
-            this.Controls.Add(this.txtFilePath);
+            this.Controls.Add(this.FilePath1);
             this.Controls.Add(this.btnImgSelect);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -243,7 +290,7 @@
         #endregion
 
         private System.Windows.Forms.Button btnImgSelect;
-        private System.Windows.Forms.TextBox txtFilePath;
+        private System.Windows.Forms.TextBox FilePath1;
         private System.Windows.Forms.Button btnToBGR;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
@@ -260,6 +307,10 @@
         private System.Windows.Forms.Button btnPxsToHex;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button btn1from9;
+        private System.Windows.Forms.TextBox FilePath2;
+        private System.Windows.Forms.Button btnSelectText;
+        private System.Windows.Forms.Button btnDecToHex;
+        private System.Windows.Forms.Button btnPicToDec;
     }
 }
 
