@@ -10,6 +10,7 @@
  ** btn1from9_Click，3x3 pxs select 1 px at center，2025-07-30
  ** btn1from9_Click add 3x3 or 9x1 selection，2025-07-31
  ** btnPicToDec_Click，將圖檔轉為RGB565分兩個Byte傳輸，共72*176*2=25344 bytes，2025-08-05
+ ** btnPicToDec_Click程序中加入 resize圖片為72x176 pxs，2025-08-08
  ** 
 ******************************************************************************/
 
@@ -74,22 +75,17 @@ namespace WinFormApp_pxToRGB
         string strFileDailyPath = "";   //userAppFolder + "\\" + strLogNameDaily;    //@"\Burn1to10.csv";
         string strSwVer = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.ToString();
 
-        public enum ColorIdx //2025-08-05
-        {
-            Red = 1,
-            Green = 2,
-            Blue = 3
-        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            FilePath1.ReadOnly = true;
+            FilePath1.ReadOnly = true; FilePath2.ReadOnly = true; richTextBox1.ReadOnly = true;
             FilePath1.BackColor = SystemColors.Info;
             toolStripStatusLabel1.Text = "Select a image file to convert.";
             btnToBGR.Enabled = false; btnPxsToHex.Enabled = false; //2025-07-22
             btn1from9.Enabled = false; //2025-07-30
             btnDecToHex.Enabled = false;    //2025-08-04
             btnPicToDec.Enabled = false; //2025-08-05
+            btnPicToDec.ForeColor = Color.Red;
 
             txtMac.Text = GetMacAddress().ToString();
             lblSWver.Text = /*"SW : " +*/ fileName + " - ver: " + strSwVer + " ; 程式碼日期 : " + buildDateTime;
@@ -163,9 +159,7 @@ namespace WinFormApp_pxToRGB
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("Are you sure to exit？", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-
-            }
+            {  }
             else { e.Cancel = true; }
         }
 
@@ -226,9 +220,7 @@ namespace WinFormApp_pxToRGB
                 }
             }
             catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "WndProc");
-            }
+            { MessageBox.Show(ex.Message, "WndProc"); }
             base.WndProc(ref m);
         }
         static string AddSpaceEveryNChar(string str, int split)   //2023-08-11
@@ -258,7 +250,7 @@ namespace WinFormApp_pxToRGB
             toolStripStatusLabel1.Text = "按下 ToBGRimage 或者 To_Hex 按鈕以產出結果";
         }
 
-        private void btnToBGR_Click(object sender, EventArgs e)
+        private void btnToBGR_Click(object sender, EventArgs e) //圖片pxs轉成RGB分開的3pxs，72*176 pxs會轉成216*176 pxs的圖片
         {
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
@@ -342,7 +334,7 @@ namespace WinFormApp_pxToRGB
         }
 
 
-        private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22
+        private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22：圖片pxs轉成十六進位數字
         {
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
@@ -422,12 +414,10 @@ namespace WinFormApp_pxToRGB
                 toolStripStatusLabel1.Text = "btnPxsToHex_Click" + "發生錯誤: " + ex.Message;
             }
             finally
-            {
-                toolStripStatusLabel1.Text = "PxsToHex Done.";
-            }
+            { toolStripStatusLabel1.Text = "PxsToHex Done."; }
         }
 
-        private void btn1from9_Click(object sender, EventArgs e)    //2025-07-30
+        private void btn1from9_Click(object sender, EventArgs e)    //2025-07-30：圖片pxs從9pxs中只擷取1px出來
         {
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   //"D:\\temporary\\imgs\\ITRI_img1-72x176.png"; //"input.png"; // 替換為你的輸入圖片路徑
@@ -497,7 +487,7 @@ namespace WinFormApp_pxToRGB
             }
         }
 
-        private void btn25344_Click(object sender, EventArgs e) //2025-08-04
+        private void btn25344_Click(object sender, EventArgs e) //2025-08-04：選取Text檔案，當下還用不到
         {
             OpenFileDialog openDialog = new OpenFileDialog();
             openDialog.Title = "Select A File";
@@ -540,16 +530,15 @@ namespace WinFormApp_pxToRGB
                 toolStripStatusLabel1.Text = "btnDecToHex_Click" + "發生錯誤: " + ex.Message;
             }
             finally
-            {
-                toolStripStatusLabel1.Text = "DecToHex Done.";
-            }
+            { toolStripStatusLabel1.Text = "DecToHex Done."; }
         }
 
-        private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05：72x176 pxs圖片轉RGB565分兩個Byte傳輸
-        {
+        private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05：72x176 pxs圖片轉RGB565分兩個Byte傳輸，72*176*2=25344 bytes 
+        {   //在ITRI的LED pannel上驗證OK
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
             string outputTextPath = userAppFolder + "\\PxsToDec.text";    //"輸出路徑檔案
+            string outputImagePath = userAppFolder + "\\ImgResizeTo72x176.png";
             utilCheckUserFile();
 
             File.Delete(outputTextPath); //刪除舊檔案  
@@ -559,6 +548,17 @@ namespace WinFormApp_pxToRGB
             {
                 // 讀取圖片
                 Bitmap inputImage = new Bitmap(inputImagePath);
+
+                //resize圖片為72x176 pxs
+                if (inputImage.Width != 72 || inputImage.Height != 176)
+                {
+                    Bitmap resizedImage = new Bitmap(inputImage, new Size(72, 176));
+                    inputImage.Dispose(); //釋放原圖資源
+                    inputImage = resizedImage; //使用新的調整大小的圖片
+                    //儲存輸出圖片                    
+                    File.Delete(outputImagePath); //刪除舊檔案 
+                    resizedImage.Save(outputImagePath, ImageFormat.Png); //或其他你想要的格式
+                }
 
                 // 遍歷每個像素
                 for (int y = 0; y < inputImage.Height; y++)
@@ -603,18 +603,16 @@ namespace WinFormApp_pxToRGB
                 toolStripStatusLabel1.Text = "btnPicToDec_Click" + "發生錯誤: " + ex.Message;
             }
             finally
-            {
-                toolStripStatusLabel1.Text = "btnPicToDec_Click Done.";
-            }
+            { toolStripStatusLabel1.Text = "btnPicToDec_Click Done."; }
         }
-        public static int Clamp(int value, int min, int max)    //2025-08-05：Math未包含Clamp的定義，因此自行定義
+        public static int Clamp(int value, int min, int max)    //Math未包含Clamp的定義，因此自行定義
         {
             if (value < min) return min;
             if (value > max) return max;
             return value;
         }
 
-        public ushort ConvertToRGB565(int r, int g, int b)
+        public ushort ConvertToRGB565(int r, int g, int b)  //RGB888 to RGB565
         {
             // 确保 RGB 值在 0 到 255 之间
             r = /*Math.*/Clamp(r, 0, 255);
