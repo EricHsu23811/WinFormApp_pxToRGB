@@ -239,7 +239,7 @@
             this.btnDecToHex.Name = "btnDecToHex";
             this.btnDecToHex.Size = new System.Drawing.Size(138, 40);
             this.btnDecToHex.TabIndex = 104;
-            this.btnDecToHex.Text = "DecToHex(NoUse)";
+            this.btnDecToHex.Text = "565To888";
             this.btnDecToHex.UseVisualStyleBackColor = true;
             this.btnDecToHex.Click += new System.EventHandler(this.btnDecToHex_Click);
             // 
