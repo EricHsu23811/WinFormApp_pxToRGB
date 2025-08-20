@@ -80,8 +80,9 @@
             this.btnToBGR.Name = "btnToBGR";
             this.btnToBGR.Size = new System.Drawing.Size(138, 40);
             this.btnToBGR.TabIndex = 8;
-            this.btnToBGR.Text = "ToBGR image";
+            this.btnToBGR.Text = "ToRGB image";
             this.btnToBGR.UseVisualStyleBackColor = true;
+            this.btnToBGR.Visible = false;
             this.btnToBGR.Click += new System.EventHandler(this.btnToBGR_Click);
             // 
             // statusStrip1
@@ -105,6 +106,7 @@
             // lblSWver
             // 
             this.lblSWver.AutoSize = true;
+            this.lblSWver.ForeColor = System.Drawing.Color.Red;
             this.lblSWver.Location = new System.Drawing.Point(12, 317);
             this.lblSWver.Name = "lblSWver";
             this.lblSWver.Size = new System.Drawing.Size(83, 15);
@@ -212,6 +214,7 @@
             this.btn1from9.TabIndex = 101;
             this.btn1from9.Text = "pick 1px from 9pxs";
             this.btn1from9.UseVisualStyleBackColor = true;
+            this.btn1from9.Visible = false;
             this.btn1from9.Click += new System.EventHandler(this.btn1from9_Click);
             // 
             // FilePath2
@@ -229,7 +232,7 @@
             this.btnSelectText.Name = "btnSelectText";
             this.btnSelectText.Size = new System.Drawing.Size(138, 40);
             this.btnSelectText.TabIndex = 102;
-            this.btnSelectText.Text = "SelectText";
+            this.btnSelectText.Text = "Select565Dec";
             this.btnSelectText.UseVisualStyleBackColor = true;
             this.btnSelectText.Click += new System.EventHandler(this.btn25344_Click);
             // 
@@ -239,7 +242,7 @@
             this.btnDecToHex.Name = "btnDecToHex";
             this.btnDecToHex.Size = new System.Drawing.Size(138, 40);
             this.btnDecToHex.TabIndex = 104;
-            this.btnDecToHex.Text = "565To888";
+            this.btnDecToHex.Text = "Dec565ToImg";
             this.btnDecToHex.UseVisualStyleBackColor = true;
             this.btnDecToHex.Click += new System.EventHandler(this.btnDecToHex_Click);
             // 

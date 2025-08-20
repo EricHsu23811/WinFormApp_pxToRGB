@@ -12,6 +12,7 @@
  ** btnPicToDec_Click，將圖檔轉為RGB565分兩個Byte傳輸，共72*176*2=25344 bytes，2025-08-05
  ** btnPicToDec_Click程序中加入 resize圖片為72x176 pxs，2025-08-08
  ** btnDecToHex_Click，Decimal 轉 Hex，並將RGB565轉回RGB888圖檔=>OK，2025-08-19
+ ** btnPicToDec_Click，新增bRGB888toSingle=true時，會讀取216*176 pxs圖片用單R色產出25344 bytes，2025-08-20
  ** 
 ******************************************************************************/
 
@@ -505,7 +506,7 @@ namespace WinFormApp_pxToRGB
             toolStripStatusLabel1.Text = "按下 ToBGRimage 或者 To_Hex 按鈕以產出結果";
         }
 
-        private void btnDecToHex_Click(object sender, EventArgs e) //2025-08-19：Decimal 轉 Hex，並將RGB565轉回RGB888圖檔=>OK
+        private void btnDecToHex_Click(object sender, EventArgs e) //2025-08-19：將RGB565轉回RGB888圖檔=>OK；btnPicToDec_Click的反向操作
         {
             // 設定輸入和輸出檔案路徑
             string inputTextPath = FilePath2.Text;   // 替換為輸入圖片路徑
@@ -520,7 +521,7 @@ namespace WinFormApp_pxToRGB
             int iWidth = 72*2;  int iHeight = 176;    //轉72x176 pxs圖片
             int RGB565data1 = 0; //高位Byte
             int RGB565data2 = 0; //低位Byte
-            int[] RGB565data ;
+
             // 建立輸出圖片:2025-08-19
             Bitmap outputImage = new Bitmap(iWidth / 2, iHeight);
             Color newColor = Color.FromArgb(0, 0, 0);   //default
@@ -534,6 +535,9 @@ namespace WinFormApp_pxToRGB
                 string[] numbers = inputText.Trim('{', '}').Split(','); 
                 Console.WriteLine(numbers.Length + " numbers found in input file.");    //numbers.Length：輸入檔案有多少個數字，應為72*176*2=25344
 
+                if (numbers.Length > iWidth * iHeight)     //超出陣列的就不要，陣列應為25344個元素
+                { Array.Resize(ref numbers, iWidth * iHeight); }
+
                 // 建立一個 List 來儲存要寫入檔案的行
                 List<string> outputLines = new List<string>();
 
@@ -542,8 +546,11 @@ namespace WinFormApp_pxToRGB
                 {
                     // 提取 iWidth 個數字，如果不足 ，則取剩餘的
                     string[] lineNumbers = numbers.Skip(i).Take(iWidth).ToArray();
-                    Console.WriteLine("565data[1] = " + lineNumbers[0]); Console.WriteLine("565data[2] = " + lineNumbers[1]);
-                    Console.WriteLine("565data[3] = " + lineNumbers[3]); Console.WriteLine("565data[4] = " + lineNumbers[4]);                    
+                    
+                    Console.WriteLine("565data[1] = " + lineNumbers[0]);   //lineNumbers[0]); 
+                    Console.WriteLine("565data[2] = " + lineNumbers[1]);   //lineNumbers[1]);
+                    //Console.WriteLine("565data[3] = " + lineNumbers[2]);
+                    //Console.WriteLine("565data[4] = " + lineNumbers[3]);                    
 
                     for (int m=0; m < lineNumbers.Length; m++)  //2025-08-18
                     {                        
@@ -555,7 +562,7 @@ namespace WinFormApp_pxToRGB
                             { 
                                 RGB565data2 = number;
 
-                                // 改成
+                                // RGB565轉為RGB888
                                 var rgb888 = ConvertToRGB888(RGB565data1, RGB565data2);
                                 newColor = Color.FromArgb(rgb888.r, rgb888.g, rgb888.b);    //2025-08-19
                                 
@@ -566,6 +573,8 @@ namespace WinFormApp_pxToRGB
                         else
                         {
                             Console.WriteLine("無效的數字: " + lineNumbers[m]);
+                            toolStripStatusLabel1.Text = "無效的數字: " + lineNumbers[m] + " (must be int 0~255) ";
+                            return; //跳出循環
                         }
                     }
                     // 將數字用逗號分隔，組成一行
@@ -575,7 +584,7 @@ namespace WinFormApp_pxToRGB
                     outputLines.Add(line);
                     richTextBox1.AppendText(line + ",\r");
 
-                                n++;    //2025-08-19：每處理一行就增加n，代表輸出圖片的y座標
+                    n++;    //2025-08-19：每處理一行就增加n，代表輸出圖片的y座標
                 }
                 // 儲存輸出圖片
                 outputImage.Save(outputImagePath, ImageFormat.Png);//或其他你想要的格式，outputImage.SetPixel計數器
@@ -596,7 +605,7 @@ namespace WinFormApp_pxToRGB
                 toolStripStatusLabel1.Text = "btnDecToHex_Click" + "發生錯誤: " + ex.Message;
             }
             finally
-            { toolStripStatusLabel1.Text = "DecToHex Done."; }
+            { toolStripStatusLabel1.Text += "DecToHex Done."; }
         }
 
         private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05：72x176 pxs圖片轉RGB565分兩個Byte傳輸，72*176*2=25344 bytes 
@@ -610,48 +619,99 @@ namespace WinFormApp_pxToRGB
             File.Delete(outputTextPath); //刪除舊檔案  
             richTextBox1.Text = ""; //清空richTextBox1
 
+            Boolean bRGB888toSingle = false; //2025-08-20：是否要RGB888(216*176pxs)轉為單色，預設為false(圖片應為72x176 pxs)
+
             try
             {
                 // 讀取圖片
                 Bitmap inputImage = new Bitmap(inputImagePath);
+                byte Cut = 8;  //超過某數值的顏色才顯示出來，預設為8
+                byte r = 0;
+                byte g = 0;
+                byte b = 0;
+                int RGB565data1 = 0; //高位Byte
+                int RGB565data2 = 0; //低位Byte
 
-                //resize圖片為72x176 pxs
-                if (inputImage.Width != 72 || inputImage.Height != 176)
+                if (bRGB888toSingle) //2025-08-20：是否RGB888圖片(216*176 pxs)只擷取R單色？=>再轉換ConvertToRGB565
                 {
-                    Bitmap resizedImage = new Bitmap(inputImage, new Size(72, 176));
-                    inputImage.Dispose(); //釋放原圖資源
-                    inputImage = resizedImage; //使用新的調整大小的圖片
-                    //儲存輸出圖片                    
-                    File.Delete(outputImagePath); //刪除舊檔案 
-                    resizedImage.Save(outputImagePath, ImageFormat.Png); //或其他你想要的格式
-                }
-
-                // 遍歷每個像素
-                for (int y = 0; y < inputImage.Height; y++)
-                {
-                    for (int x = 0; x < inputImage.Width; x++)  
+                    //將216*176 pxs圖片轉為單色
+                    Bitmap singleColorImage = new Bitmap(inputImage.Width, inputImage.Height);
+                    for (int y = 0; y < inputImage.Height; y++)
                     {
-                        // 獲取像素的 RGB 值
-                        Color pixelColor = inputImage.GetPixel(x, y);
-                        byte r = pixelColor.R;
-                        byte g = pixelColor.G;
-                        byte b = pixelColor.B;
-                        byte Cut = 8;  //no show out if under the value
-                        int RGB565data1 = 0; //高位Byte
-                        int RGB565data2 = 0; //低位Byte
+                        for (int x = 0; x < inputImage.Width; x++)
+                        {
+                            // 獲取像素的 RGB 值
+                            Color pixelColor = inputImage.GetPixel(x, y);
 
-                        //if (r > Cut || g > Cut || b > Cut) //將RGB值轉為最大值255
-                        //{ r = 255; g = 255; b = 255; }
-
-                        ushort rgb565Color = ConvertToRGB565(r, g, b);  // 轉換ConvertToRGB565
-                        Console.WriteLine($"RGB565 Color: {rgb565Color}");
-                        //richTextBox1.AppendText(rgb565Color + ",");
-                        RGB565data1 = (rgb565Color >> 8) & 0xFF; //高位Byte
-                        richTextBox1.AppendText(RGB565data1 + ",");
-                        RGB565data2 = rgb565Color & 0xFF; //低位Byte
-                        richTextBox1.AppendText(RGB565data2 + ",");
+                            if (x % 3 == (int)pxColor.Red)
+                            {
+                                r = pixelColor.R; //取1st px的R值
+                            }
+                            else if (x % 3 == (int)pxColor.Green)
+                            {
+                                g = pixelColor.R; //取2nd px的R值
+                            }
+                            else //if (x % 3 == (int)pxColor.Blue)
+                            {
+                                b = pixelColor.R; //取3rd px的R值
+                                ushort rgb565Color = ConvertToRGB565(r, g, b);  // 轉換ConvertToRGB565
+                                Console.WriteLine($"RGB565 Color: {rgb565Color}");
+                                //richTextBox1.AppendText(rgb565Color + ",");
+                                RGB565data1 = (rgb565Color >> 8) & 0xFF; //高位Byte
+                                richTextBox1.AppendText(RGB565data1 + ",");
+                                RGB565data2 = rgb565Color & 0xFF; //低位Byte
+                                if (y == inputImage.Height - 1 && x == inputImage.Width - 1)
+                                { richTextBox1.AppendText(RGB565data2.ToString() /*+ "\r"*/); } //最後一個pxs不加逗號  //最後一個pxs換行
+                                else
+                                { richTextBox1.AppendText(RGB565data2 + ","); }
+                            }
+                            //byte grayValue = (byte)((pixelColor.R + pixelColor.G + pixelColor.B) / 3); //計算灰階值
+                            //singleColorImage.SetPixel(x, y, Color.FromArgb(grayValue, grayValue, grayValue));
+                        }
                     }
-                    //richTextBox1.AppendText("\r");
+                    inputImage.Dispose(); //釋放原圖資源
+                    inputImage = singleColorImage; //使用新的單色圖片
+                }
+                else
+                {
+                    //resize圖片為72x176 pxs
+                    if (inputImage.Width != 72 || inputImage.Height != 176)
+                    {
+                        Bitmap resizedImage = new Bitmap(inputImage, new Size(72, 176));
+                        inputImage.Dispose(); //釋放原圖資源
+                        inputImage = resizedImage; //使用新的調整大小的圖片
+                                                   //儲存輸出圖片                    
+                        File.Delete(outputImagePath); //刪除舊檔案 
+                        resizedImage.Save(outputImagePath, ImageFormat.Png); //或其他你想要的格式
+                    }
+
+                    // 遍歷每個像素
+                    for (int y = 0; y < inputImage.Height; y++)
+                    {
+                        for (int x = 0; x < inputImage.Width; x++)
+                        {
+                            // 獲取像素的 RGB 值
+                            Color pixelColor = inputImage.GetPixel(x, y);
+                            r = pixelColor.R;
+                            g = pixelColor.G;
+                            b = pixelColor.B;
+
+                            //int RGB565data1 = 0; //高位Byte
+                            //int RGB565data2 = 0; //低位Byte
+
+                            ushort rgb565Color = ConvertToRGB565(r, g, b);  // 轉換ConvertToRGB565
+                            Console.WriteLine($"RGB565 Color: {rgb565Color}");
+                            //richTextBox1.AppendText(rgb565Color + ",");
+                            RGB565data1 = (rgb565Color >> 8) & 0xFF; //高位Byte
+                            richTextBox1.AppendText(RGB565data1 + ",");
+                            RGB565data2 = rgb565Color & 0xFF; //低位Byte
+
+                            if (y == inputImage.Height - 1 && x == inputImage.Width - 1) 
+                            { richTextBox1.AppendText(RGB565data2.ToString() /*+ "\r"*/); } //最後一個pxs不加逗號  //最後一個pxs換行
+                            else
+                            { richTextBox1.AppendText(RGB565data2 + ","); }
+                        }
+                    }                
                 }
                 File.AppendAllText(outputTextPath, richTextBox1.Text);
 
@@ -692,18 +752,18 @@ namespace WinFormApp_pxToRGB
         }
         public (int r, int g, int b) ConvertToRGB888(int RGB565data1, int RGB565data2)  //2025-08-18，RGB565 to RGB888
         {
-            // 转换到 RGB888
+            // 轉換到 RGB888
             ushort rgb565= (ushort)(RGB565data1<<8 | RGB565data2);
 
             // 提取 RGB565 分量
             int r5 = (rgb565 >> 11) & 0x1F;  // 0x1F = 00011111 (5 位)
             int g6 = (rgb565 >> 5) & 0x3F;   // 0x3F = 00111111 (6 位)
-            int b5 = rgb565 & 0x1F;
+            int b5 = rgb565 & 0x1F;                // 0x1F = 00011111 (5 位)
 
             // 扩展到 RGB888
-            int r8 = (r5 << 3) | (r5 >> 2); // 将 5 位扩展到 8 位
-            int g8 = (g6 << 2) | (g6 >> 4); // 将 6 位扩展到 8 位
-            int b8 = (b5 << 3) | (b5 >> 2); // 将 5 位扩展到 8 位
+            int r8 = (r5 << 3) | (r5 >> 2);        // 將 5 位擴展到 8 位
+            int g8 = (g6 << 2) | (g6 >> 4);     // 將 5 位擴展到 8 位
+            int b8 = (b5 << 3) | (b5 >> 2);     // 將 5 位擴展到 8 位
 
             return (r8, g8, b8);
         }
