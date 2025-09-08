@@ -13,7 +13,8 @@
  ** btnPicToDec_Click程序中加入 resize圖片為72x176 pxs，2025-08-08
  ** btnDecToHex_Click，Decimal 轉 Hex，並將RGB565轉回RGB888圖檔=>OK，2025-08-19
  ** btnPicToDec_Click，新增bRGB888toSingle=true時，會讀取216*176 pxs圖片用單R色產出25344 bytes，2025-08-20
- ** 
+ ** 版本1.0.3.0；新增tabControl2加入用以產生輸入Bestom燒錄工具字元的功能，之前的程式碼功能放在tabPage1， 2025-09-08
+ **
 ******************************************************************************/
 
 using System;
@@ -76,11 +77,12 @@ namespace WinFormApp_pxToRGB
         static string strLogNameDaily = ""; //strFileDailyFolder + "\\" + "H4_IQC_LBS_BURN" + "_" + strDailyLogDate + ".csv";
         string strFileDailyPath = "";   //userAppFolder + "\\" + strLogNameDaily;    //@"\Burn1to10.csv";
         string strSwVer = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.ToString();
-
+        Boolean bRemoveTabpge1=true; //預設不顯示tabPage1，2025-09-08
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            FilePath1.ReadOnly = true; FilePath2.ReadOnly = true; richTextBox1.ReadOnly = true;
+            FilePath1.ReadOnly = true; FilePath2.ReadOnly = true; 
+            richTextBox1.ReadOnly = true; richTextBox2.ReadOnly = true;
             FilePath1.BackColor = SystemColors.Info;
             toolStripStatusLabel1.Text = "Select a image file to convert.";
             btnToBGR.Enabled = false; btnPxsToHex.Enabled = false; //2025-07-22
@@ -91,6 +93,13 @@ namespace WinFormApp_pxToRGB
 
             txtMac.Text = GetMacAddress().ToString();
             lblSWver.Text = /*"SW : " +*/ fileName + " - ver: " + strSwVer + " ; 程式碼日期 : " + buildDateTime;
+
+            if (bRemoveTabpge1) //預設不顯示tabPage2，2025-09-08
+            {
+                tabControl1.TabPages.Remove(tabPage1);
+                toolStripStatusLabel1.Text = "請輸入9x7字元陣列，按下 ArrToText 轉成文字";
+            }
+            
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -336,7 +345,7 @@ namespace WinFormApp_pxToRGB
         }
 
 
-        private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22：圖片pxs轉成十六進位數字
+        private void btnPxsToHex_Click(object sender, EventArgs e)  //2025-07-22：圖片pxs轉成十六進位數字(img_to_Hex/Dec)
         {
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
@@ -344,7 +353,7 @@ namespace WinFormApp_pxToRGB
             utilCheckUserFile();
             //2025-07-23
             Boolean bRGBseparate = true; //RGB是否要分色
-            File.Delete(outputTextPath); //刪除舊檔案  
+            //File.Delete(outputTextPath); //刪除舊檔案  =>改為File.WriteAllText就不必先delete舊檔案
             richTextBox1.Text = ""; //清空richTextBox1
             Boolean bPxsToDec = true; //是否要轉成十進位數字，預設為false
             int iWidthDiv = 1; //取RGB單一px時，原圖width每iWidthDiv個px取中間1px出來
@@ -399,8 +408,9 @@ namespace WinFormApp_pxToRGB
                         }                                              
                     }
                     richTextBox1.AppendText("\r");
-                }                  
-                File.AppendAllText(outputTextPath, richTextBox1.Text);
+                }
+                /*File.AppendAllText*/
+                File.WriteAllText(outputTextPath, richTextBox1.Text);   //2025-09-03
 
                 // 釋放資源
                 inputImage.Dispose();
@@ -512,7 +522,7 @@ namespace WinFormApp_pxToRGB
             string inputTextPath = FilePath2.Text;   // 替換為輸入圖片路徑
             string outputTextPath = userAppFolder + "\\DecToHex.text";    //"輸出路徑檔案
             utilCheckUserFile();
-            File.Delete(outputTextPath); //刪除舊檔案  
+            //File.Delete(outputTextPath); //刪除舊檔案  =>改為File.WriteAllText就不必先delete舊檔案
             richTextBox1.Text = ""; //清空richTextBox1
 
             string outputImagePath = userAppFolder + "\\DecToImg.png";    //2025-08-18："輸出圖檔路徑檔案
@@ -592,7 +602,7 @@ namespace WinFormApp_pxToRGB
                 // 釋放資源
                 outputImage.Dispose();
 
-                File.AppendAllText(outputTextPath, richTextBox1.Text);
+                File.WriteAllText(outputTextPath, richTextBox1.Text);   //2025-09-03
 
                 Console.WriteLine("處理完成，已儲存至 " + outputTextPath);
                 toolStripStatusLabel1.Text = "處理完成，已儲存至 " + outputTextPath;
@@ -608,7 +618,7 @@ namespace WinFormApp_pxToRGB
             { toolStripStatusLabel1.Text += "DecToHex Done."; }
         }
 
-        private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05：72x176 pxs圖片轉RGB565分兩個Byte傳輸，72*176*2=25344 bytes 
+        private void btnPicToDec_Click(object sender, EventArgs e)  //2025-08-05(ImgToDec[25344])：72x176 pxs圖片轉RGB565分兩個Byte傳輸，72*176*2=25344 bytes 
         {   //在ITRI的LED pannel上驗證OK
             // 設定輸入和輸出檔案路徑
             string inputImagePath = FilePath1.Text;   // 替換為輸入圖片路徑
@@ -616,7 +626,7 @@ namespace WinFormApp_pxToRGB
             string outputImagePath = userAppFolder + "\\ImgResizeTo72x176.png";
             utilCheckUserFile();
 
-            File.Delete(outputTextPath); //刪除舊檔案  
+            //File.Delete(outputTextPath); //刪除舊檔案=>改為File.WriteAllText就不必先delete舊檔案
             richTextBox1.Text = ""; //清空richTextBox1
 
             Boolean bRGB888toSingle = false; //2025-08-20：是否要RGB888(216*176pxs)轉為單色，預設為false(圖片應為72x176 pxs)
@@ -713,7 +723,7 @@ namespace WinFormApp_pxToRGB
                         }
                     }                
                 }
-                File.AppendAllText(outputTextPath, richTextBox1.Text);
+                File.WriteAllText(outputTextPath, richTextBox1.Text);  //2025-09-03, File.AppendAllText
 
                 // 釋放資源
                 inputImage.Dispose();
@@ -766,6 +776,232 @@ namespace WinFormApp_pxToRGB
             int b8 = (b5 << 3) | (b5 >> 2);     // 將 5 位擴展到 8 位
 
             return (r8, g8, b8);
+        }
+
+        private void btnArrToText_Click(object sender, EventArgs e)
+        {
+            string strInput9x7= inputToChars(txtChar1_1.Text) + inputToChars(txtChar1_2.Text) + inputToChars(txtChar1_3.Text) 
+                + inputToChars(txtChar1_4.Text) + inputToChars(txtChar1_5.Text) + inputToChars(txtChar1_6.Text) 
+                + inputToChars(txtChar1_7.Text) + inputToChars(txtChar1_8.Text) + inputToChars(txtChar1_9.Text)
+                + inputToChars(txtChar2_1.Text) + inputToChars(txtChar2_2.Text) + inputToChars(txtChar2_3.Text)
+                + inputToChars(txtChar2_4.Text) + inputToChars(txtChar2_5.Text) + inputToChars(txtChar2_6.Text)
+                + inputToChars(txtChar2_7.Text) + inputToChars(txtChar2_8.Text) + inputToChars(txtChar2_9.Text) 
+                + inputToChars(txtChar3_1.Text) + inputToChars(txtChar3_2.Text) + inputToChars(txtChar3_3.Text)
+                + inputToChars(txtChar3_4.Text) + inputToChars(txtChar3_5.Text) + inputToChars(txtChar3_6.Text)
+                + inputToChars(txtChar3_7.Text) + inputToChars(txtChar3_8.Text) + inputToChars(txtChar3_9.Text) 
+                + inputToChars(txtChar4_1.Text) + inputToChars(txtChar4_2.Text) + inputToChars(txtChar4_3.Text)
+                + inputToChars(txtChar4_4.Text) + inputToChars(txtChar4_5.Text) + inputToChars(txtChar4_6.Text)
+                + inputToChars(txtChar4_7.Text) + inputToChars(txtChar4_8.Text) + inputToChars(txtChar4_9.Text) 
+                + inputToChars(txtChar5_1.Text) + inputToChars(txtChar5_2.Text) + inputToChars(txtChar5_3.Text)
+                + inputToChars(txtChar5_4.Text) + inputToChars(txtChar5_5.Text) + inputToChars(txtChar5_6.Text)
+                + inputToChars(txtChar5_7.Text) + inputToChars(txtChar5_8.Text) + inputToChars(txtChar5_9.Text) 
+                + inputToChars(txtChar6_1.Text) + inputToChars(txtChar6_2.Text) + inputToChars(txtChar6_3.Text)
+                + inputToChars(txtChar6_4.Text) + inputToChars(txtChar6_5.Text) + inputToChars(txtChar6_6.Text)
+                + inputToChars(txtChar6_7.Text) + inputToChars(txtChar6_8.Text) + inputToChars(txtChar6_9.Text) 
+                + inputToChars(txtChar7_1.Text) + inputToChars(txtChar7_2.Text) + inputToChars(txtChar7_3.Text)
+                + inputToChars(txtChar7_4.Text) + inputToChars(txtChar7_5.Text) + inputToChars(txtChar7_6.Text)
+                + inputToChars(txtChar7_7.Text) + inputToChars(txtChar7_8.Text) + inputToChars(txtChar7_9.Text);
+            richTextBox2.Text = ReverseByArray(strInput9x7);
+            toolStripStatusLabel1.Text = "已將9x7陣列轉成字串，按Copy to Clipboard將結果拷貝到剪貼簿中";
+        }
+
+        private string inputToChars(string inputStr) //將輸入的字串轉成char陣列
+        {
+            //char[] chars = inputStr.ToCharArray();
+            string result = inputStr.Trim();
+            if (result.Length > 0) {
+                result = result.Substring(0, 1); //只取第一個字元
+            }
+            else
+            { result = "\u3000"; } //全形空白字元
+            return result;
+        }
+
+        public string ReverseByArray(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+        #region
+        private void txtChar1_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_1.Text = ""; }
+        private void txtChar1_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_2.Text = ""; }
+        private void txtChar1_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_3.Text = ""; }
+        private void txtChar1_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_4.Text = ""; }
+        private void txtChar1_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_5.Text = ""; }
+        private void txtChar1_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_6.Text = ""; }
+        private void txtChar1_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_7.Text = ""; }
+        private void txtChar1_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_8.Text = ""; }
+        private void txtChar1_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar1_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar2_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_1.Text = ""; }
+        private void txtChar2_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_2.Text = ""; }
+        private void txtChar2_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_3.Text = ""; }
+        private void txtChar2_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_4.Text = ""; }
+        private void txtChar2_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_5.Text = ""; }
+        private void txtChar2_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_6.Text = ""; }
+        private void txtChar2_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_7.Text = ""; }
+        private void txtChar2_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_8.Text = ""; }
+        private void txtChar2_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar2_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar3_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_1.Text = ""; }
+        private void txtChar3_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_2.Text = ""; }
+        private void txtChar3_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_3.Text = ""; }
+        private void txtChar3_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_4.Text = ""; }
+        private void txtChar3_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_5.Text = ""; }
+        private void txtChar3_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_6.Text = ""; }
+        private void txtChar3_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_7.Text = ""; }
+        private void txtChar3_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_8.Text = ""; }
+        private void txtChar3_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar3_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar4_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_1.Text = ""; }
+        private void txtChar4_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_2.Text = ""; }
+        private void txtChar4_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_3.Text = ""; }
+        private void txtChar4_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_4.Text = ""; }
+        private void txtChar4_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_5.Text = ""; }
+        private void txtChar4_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_6.Text = ""; }
+        private void txtChar4_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_7.Text = ""; }
+        private void txtChar4_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_8.Text = ""; }
+        private void txtChar4_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar4_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar5_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_1.Text = ""; }
+        private void txtChar5_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_2.Text = ""; }
+        private void txtChar5_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_3.Text = ""; }
+        private void txtChar5_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_4.Text = ""; }
+        private void txtChar5_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_5.Text = ""; }
+        private void txtChar5_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_6.Text = ""; }
+        private void txtChar5_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_7.Text = ""; }
+        private void txtChar5_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_8.Text = ""; }
+        private void txtChar5_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar5_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar6_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_1.Text = ""; }
+        private void txtChar6_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_2.Text = ""; }
+        private void txtChar6_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_3.Text = ""; }
+        private void txtChar6_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_4.Text = ""; }
+        private void txtChar6_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_5.Text = ""; }
+        private void txtChar6_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_6.Text = ""; }
+        private void txtChar6_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_7.Text = ""; }
+        private void txtChar6_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_8.Text = ""; }
+        private void txtChar6_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar6_9.Text = ""; }
+        #endregion
+
+        #region
+        private void txtChar7_1_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_1.Text = ""; }
+        private void txtChar7_2_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_2.Text = ""; }
+        private void txtChar7_3_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_3.Text = ""; }
+        private void txtChar7_4_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_4.Text = ""; }
+        private void txtChar7_5_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_5.Text = ""; }
+        private void txtChar7_6_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_6.Text = ""; }
+        private void txtChar7_7_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_7.Text = ""; }
+        private void txtChar7_8_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_8.Text = ""; }
+        private void txtChar7_9_KeyDown(object sender, KeyEventArgs e)
+        { txtChar7_9.Text = ""; }
+        #endregion
+
+        private void btnArrClear_Click(object sender, EventArgs e)
+        {
+            richTextBox2.Text = "";
+            txtChar1_1.Text = ""; txtChar1_2.Text = ""; txtChar1_3.Text = ""; 
+            txtChar1_4.Text = ""; txtChar1_5.Text = ""; txtChar1_6.Text = "";
+            txtChar1_7.Text = ""; txtChar1_8.Text = ""; txtChar1_9.Text = "";
+            txtChar2_1.Text = ""; txtChar2_2.Text = ""; txtChar2_3.Text = "";
+            txtChar2_4.Text = ""; txtChar2_5.Text = ""; txtChar2_6.Text = "";
+            txtChar2_7.Text = ""; txtChar2_8.Text = ""; txtChar2_9.Text = "";
+            txtChar3_1.Text = ""; txtChar3_2.Text = ""; txtChar3_3.Text = "";
+            txtChar3_4.Text = ""; txtChar3_5.Text = ""; txtChar3_6.Text = "";
+            txtChar3_7.Text = ""; txtChar3_8.Text = ""; txtChar3_9.Text = "";
+            txtChar4_1.Text = ""; txtChar4_2.Text = ""; txtChar4_3.Text = "";
+            txtChar4_4.Text = ""; txtChar4_5.Text = ""; txtChar4_6.Text = "";
+            txtChar4_7.Text = ""; txtChar4_8.Text = ""; txtChar4_9.Text = "";
+            txtChar5_1.Text = ""; txtChar5_2.Text = ""; txtChar5_3.Text = "";
+            txtChar5_4.Text = ""; txtChar5_5.Text = ""; txtChar5_6.Text = "";
+            txtChar5_7.Text = ""; txtChar5_8.Text = ""; txtChar5_9.Text = "";
+            txtChar6_1.Text = ""; txtChar6_2.Text = ""; txtChar6_3.Text = "";
+            txtChar6_4.Text = ""; txtChar6_5.Text = ""; txtChar6_6.Text = "";
+            txtChar6_7.Text = ""; txtChar6_8.Text = ""; txtChar6_9.Text = "";
+            txtChar7_1.Text = ""; txtChar7_2.Text = ""; txtChar7_3.Text = "";
+            txtChar7_4.Text = ""; txtChar7_5.Text = ""; txtChar7_6.Text = "";
+            txtChar7_7.Text = ""; txtChar7_8.Text = ""; txtChar7_9.Text = "";
+            toolStripStatusLabel1.Text = "已清除9x7陣列，請輸入9x7字元陣列，按下 ArrToText 轉成文字";
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(richTextBox2.Text);
+            toolStripStatusLabel1.Text = "已將結果拷貝到剪貼簿中";
         }
 
     }
